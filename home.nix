@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
 
@@ -9,9 +9,18 @@ let
     }) {
       # config.allowBroken = true;
       config.allowUnfree = true;
+      nixpkgs.config.allowUnfree = true;
+      services.xserver.videoDrivers = [ "nvidia" ];
+      hardware.opengl.enable = true;
+      hardware.nvidia.modesetting.enable = true;
     };
-
   pkgsUnstable = import <nixpkgs-unstable> {};
+  pkgsAuto = import <nixgl> {};
+  nix.extraOptions = ''
+  experimental-features = nix-command
+  '';
+
+
 
 in
   {
@@ -28,10 +37,37 @@ in
         pkgs.direnv
         pkgs.speedtest-cli
         pkgs.wget
-       # pkgs.zsh-powerlevel10k
-       # pkgs.zsh
-       # pkgs.meslo-lgs-nf
         pkgsUnstable.morph
+        pkgs.texlive.combined.scheme-full
+        pkgs.ninja
+        pkgs.shadow
+	pkgs.qemu
+        pkgs.podman
+        pkgs.slirp4netns
+        pkgs.gnuradio
+        pkgs.gpredict
+        pkgs._1password-gui
+        pkgs.lynx
+        pkgs.haskellPackages.xmonad
+        pkgs.gum
+        pkgs.yarn
+        pkgs.obs-studio
+        pkgs.niv
+        pkgs.nomad
+        pkgs.sops
+        pkgs.age
+        pkgs.ssh-to-age
+        pkgs.vim
+        pkgs.virtualbox
+        pkgs.tilix
+	pkgs.vagrant
+
+        #VFX
+        pkgs.blender
+        pkgs.glxinfo
+        pkgs.libGL
+        pkgsAuto.auto.nixGLDefault
+        pkgs.glibc
 
         #CUE
         pkgs.cue
@@ -49,6 +85,9 @@ in
 
         # BEAM
         pkgs.elixir
+	      pkgs.gleam
+        pkgs.erlang
+	      pkgs.rebar3
 
         # Rust
         pkgs.cargo
@@ -59,10 +98,20 @@ in
 
         #Go
         pkgs.go
+        pkgs.hugo
+
+        #Games
+        pkgs.haxe
 
         #Dhall
         pkgs.dhall
         pkgs.dhall-json
+
+        #Electronics
+        pkgs.fritzing
+        pkgs.kicad
+
+
 
         # Editor
        # unstable.emacs
@@ -73,6 +122,7 @@ in
       # file.".emacs.d/init.el".text = ''
       #   (lIoad "default.el")
       # '';
+
 
     stateVersion = "22.05";
     username = "forgondolin";
@@ -104,6 +154,13 @@ in
       autojump.enable = true;
       bat.enable      = true;
       home-manager.enable = true;
+      direnv.enable = true;
+      exa.enable = true;
+      fzf = {
+       enable = true;
+       fileWidgetOptions = [ "--preview 'bat --color always {}'" ];
+     };
+
      #  direnv = {
      #    enable = true;
      #    enableNixDirenvIntegration = true;
@@ -126,19 +183,14 @@ in
         plugins = [ pkgs.tmuxPlugins.yank ];
       };
 
-     fish = {
-       enable = true;
 
-     };
-
-/*
       zsh = {
         enable = true;
         enableAutosuggestions = true;
-      enableCompletion = true;
-      oh-my-zsh = {
-        enable = true;
-        plugins = [
+        enableCompletion = false;
+        oh-my-zsh = {
+         enable = true;
+         plugins = [
           "bundler"
           "direnv"
           "docker"
@@ -155,17 +207,13 @@ in
         EDITOR = "vim";
         GOPATH = "$HOME/.go";
       };
-      shellAliases = {
-        ls = "exa --git";
-        ll = "exa -lh --git";
-      };
     };
-      */
+
 
      starship = {
       enable = true;
-      enableZshIntegration = false;
-      enableFishIntegration = true;
+      enableZshIntegration = true;
+      enableFishIntegration = false;
       settings = {
         character = {
           success_symbol = "[»](bold green) ";
@@ -224,5 +272,6 @@ in
         };
     
   };
+
     
  }

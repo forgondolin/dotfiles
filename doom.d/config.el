@@ -35,17 +35,21 @@
         doom-themes-enable-italic t)   ; if nil, italics is universally disabled
   ;; (load-theme 'doom-vibrant t)
   ;; (load-theme 'leuven t)
-  ;; (load-theme 'doom-dark+ t)
+     (load-theme 'doom-dark+ t)
   ;; (load-theme 'doom-solarized-light t)
-  (load-theme 'doom-one t)
+  ;; (load-theme 'doom-one t)
   ;; (load-theme 'doom-one-light t)
   ;; (load-theme 'doom-nord-light t)
-
   ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
+  (let ((alternatives '("doom-emacs-bw-light.svg"
+                      "doom-emacs-flugo-slant_out_purple-small.png"
+                      "doom-emacs-flugo-slant_out_bw-small.png")))
+     (setq fancy-splash-image
+        (concat doom-private-dir "splash/"
+                (nth (random (length alternatives)) alternatives))))
 
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+(doom-themes-org-config))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -53,8 +57,11 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
-(setq fancy-splash-image "/home/forgondolin/.doom.d/splash/doomEmacsTokyoNight.svg")
+;;(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
+;;(setq linum-format "%4d \u2502 ")
+(setq linum-format "%d ")
+;;(setq fancy-splash-image "/home/forgondolin/.config/nixpkgs/doom.d/splash/doomEmacsTokyoNight.svg")
 (add-hook 'MAJOR-MODE-local-vars-hook #'lsp!)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -74,3 +81,9 @@
 ;; they are implemented.
 
 
+(after! ivy-posframe
+; Set frame position
+(setf (alist-get t ivy-posframe-display-functions-alist)
+      #'ivy-posframe-display-at-frame-top-center))
+
+(add-hook 'window-setup-hook #'toggle-frame-maximized)
