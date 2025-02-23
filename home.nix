@@ -1,252 +1,197 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib,  ... }:
 
-let
-
-  unstable = import
-    (builtins.fetchTarball {
-      # url = https://github.com/NixOS/nixpkgs/tarball/f930ea227cecaed1f1bdb047fef54fe4f0721c8c; # nixpkgs-unstable 5 July 2021
-      url = https://github.com/NixOS/nixpkgs/tarball/14b0f20fa1f56438b74100513c9b1f7c072cf789; # nixpkgs-unstable 20 Aug 2021
-    }) {
-      # config.allowBroken = true;
-      config.allowUnfree = true;
-      nixpkgs.config.allowUnfree = true;
-      services.xserver.videoDrivers = [ "nvidia" ];
-      hardware.opengl.enable = true;
-      hardware.nvidia.modesetting.enable = true;
-    };
-  pkgsUnstable = import <nixpkgs-unstable> {};
-  pkgsAuto = import <nixgl> {};
-  nix.extraOptions = ''
-  experimental-features = nix-command
-  '';
-
-
-
+let 
+  unstable = import <nixos-unstable> {};
 in
-  {
-    home = {
-         homeDirectory = "/home/forgondolin";
-       packages = [
-       # Utilidades
-        pkgs.git
-        pkgs.gitAndTools.gh
-        pkgs.awscli2
-        pkgs.pulumi-bin
-        pkgs.neofetch
-        pkgs.coreutils
-        pkgs.direnv
-        pkgs.speedtest-cli
-        pkgs.wget
-        pkgsUnstable.morph
-        pkgs.texlive.combined.scheme-full
-        pkgs.ninja
-        pkgs.shadow
-	pkgs.qemu
-        pkgs.podman
-        pkgs.slirp4netns
-        pkgs.gnuradio
-        pkgs.gpredict
-        pkgs._1password-gui
-        pkgs.lynx
-        pkgs.haskellPackages.xmonad
-        pkgs.gum
-        pkgs.yarn
-        pkgs.obs-studio
-        pkgs.niv
-        pkgs.nomad
-        pkgs.sops
-        pkgs.age
-        pkgs.ssh-to-age
-        pkgs.vim
-        pkgs.virtualbox
-        pkgs.tilix
-	pkgs.vagrant
+{
 
-        #VFX
-        pkgs.blender
-        pkgs.glxinfo
-        pkgs.libGL
-        pkgsAuto.auto.nixGLDefault
-        pkgs.glibc
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+    }))
+    (self: super: {
+      emacsGit = super.emacsGit.override {
+        withXwidgets = true;
+        withGTK3 = true;
+      };
+    })
+  ];
 
-        #CUE
-        pkgs.cue
-
-        # Process
-        pkgs.htop
-        pkgs.lsof
-
-        # FS
-        pkgs.ripgrep
-        pkgs.tree
-
-        # Data
-        unstable.ipfs
-
-        # BEAM
-        pkgs.elixir
-	      pkgs.gleam
-        pkgs.erlang
-	      pkgs.rebar3
-
-        # Rust
-        pkgs.cargo
-        pkgs.rustc
-
-        # Haskell
-        # x86.stack
-
-        #Go
-        pkgs.go
-        pkgs.hugo
-
-        #Games
-        pkgs.haxe
-
-        #Dhall
-        pkgs.dhall
-        pkgs.dhall-json
-
-        #Electronics
-        pkgs.fritzing
-        pkgs.kicad
-
-
-
-        # Editor
-       # unstable.emacs
-       # doom-emacs
-        # unstable.haskell-language-server
-      ];
-
-      # file.".emacs.d/init.el".text = ''
-      #   (lIoad "default.el")
-      # '';
-
-
-    stateVersion = "22.05";
-    username = "forgondolin";
+  # Home Manager needs a bit of information about you and the
+  # paths it should manage.
+  home.username = "forgondolin";
+  home.homeDirectory = "/home/forgondolin";
+ 
+ home.packages = [
+    pkgs.fortune
+    pkgs.fd
+    pkgs.ripgrep
+    pkgs.git
+    pkgs.haxe
+    pkgs.neofetch
+    pkgs.go
+    pkgs.rustc
+    pkgs.cargo
+    pkgs.ocaml
+    pkgs.postman
+    pkgs.kubo
+    pkgs.steam-run
+    pkgs.gcc
+    pkgs.pulumi
+    pkgs.inetutils
+    pkgs.guvcview
+    pkgs.emacsPackages.xwidgete
+    pkgs.nodejs
+    pkgs.vscode
+    pkgs.lutris
+    pkgs.dxvk
+    pkgs.niv
+    pkgs.dbeaver
+    pkgs.vlc
+    pkgs.protonvpn-gui
+    pkgs.python39
+    pkgs.python311Packages.pip
+    pkgs.flyctl
+    pkgs.elixir_1_15
+    pkgs.lld
+    pkgs.rustup-toolchain-install-master
+    pkgs.libGL
+    pkgs.obsidian
+    #nvidia
     
-    sessionPath = [
+
+
+    #Gaming
+    pkgs.godot_4
+    pkgs.yuzu-early-access
+    #Network
+    pkgs.nmap
+    pkgs.wireshark
+    pkgs.htop  
+    pkgs.snort
+	    
+    #Edition
+    pkgs.gimp
+    pkgs.obs-studio
+    pkgs.cudaPackages.cudatoolkit
+
+    pkgs.pulseaudio
+    
+    #Music
+    pkgs.vcv-rack
+    pkgs.libjack2
+    pkgs.audacity
+    unstable.cardinal
+ ];
+
+
+home.sessionPath = [
     "$HOME/.cargo/bin"
     "$HOME/.emacs.d/bin"
     "$HOME/.go/bin"
     "$HOME/.local/bin"
-  ];    
-    
-    file.".doom.d" = {
+  ];
+
+home.sessionVariables = {
+  EDITOR = "emacs";
+  LANG = "pt_BR.UTF-8";
+  LC_ALL = "pt_BR.UTF-8";
+  LANGUAGE = "pt_BR:en_US";
+
+  NIX_LD_LIBRARY_PATH = with pkgs;
+      lib.makeLibraryPath [
+        stdenv.cc.cc
+        zlib
+        fuse3
+        icu
+        zlib
+        nss
+        openssl
+        curl
+        expat
+      ];
+
+    NIX_LD = builtins.readFile "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+};
+
+home.stateVersion = "23.05";
+
+
+
+programs.home-manager.enable = true;
+ services.gpg-agent = {
+    enable = true;
+    defaultCacheTtl = 1800;
+    enableSshSupport = true;
+  };
+
+ programs.zsh = {
+    enable = true;
+    enableCompletion = false;
+    enableAutosuggestions = true;
+    syntaxHighlighting.enable = true;
+    shellAliases = {
+       rb = "sudo nixos-rebuild switch --flake .#forgondolin"; };
+
+    initExtraBeforeCompInit = builtins.readFile ./modules/shell/zshrc;
+    oh-my-zsh = {
+      enable = true;
+      theme = "af-no-magic";
+      plugins = [
+        "git"
+        "tmuxinator"
+        "nix-shell"
+        "direnv"
+        "aws"
+        "docker"
+        "encode64"
+      ];
+    };
+  };
+
+home.file.".doom.d" = {
     onChange = ''
       #!/bin/sh
+      emacs="$HOME/.emacs.d/bin"
       DOOM="$HOME/.emacs.d"
       if [ ! -d "$DOOM" ]; then
         git clone git@github.com:doomemacs/doomemacs.git $HOME/.emacs.d
         $DOOM/bin/doom -y install
       fi
-      $DOOM/bin/doom sync
+
+     # $DOOM/bin/doom sync
     '';
     source = ./doom.d;
     recursive = true;
   };
 
-};
-
-    programs = {
-      autojump.enable = true;
-      bat.enable      = true;
-      home-manager.enable = true;
-      direnv.enable = true;
-      exa.enable = true;
-      fzf = {
-       enable = true;
-       fileWidgetOptions = [ "--preview 'bat --color always {}'" ];
-     };
-
-     #  direnv = {
-     #    enable = true;
-     #    enableNixDirenvIntegration = true;
-     #    #  nix-direnv = {
-     #    #    enable = true;
-     #    #    enableFlakes = true;
-     #    #  };
-     #  };
-     tmux = {
-        enable = true;
-        baseIndex = 1;
-        historyLimit = 100500;
-        keyMode = "emacs";
-        extraConfig = ''
-          unbind C-Space
-          set -g prefix C-Space
-          bind C-Space send-prefix
-          set -g status off
-        '';
-        plugins = [ pkgs.tmuxPlugins.yank ];
-      };
-
-
-      zsh = {
-        enable = true;
-        enableAutosuggestions = true;
-        enableCompletion = false;
-        oh-my-zsh = {
-         enable = true;
-         plugins = [
-          "bundler"
-          "direnv"
-          "docker"
-          "docker-compose"
-          "git"
-          "golang"
-          "mix"
-          "rails"
-          "ssh-agent"
-          "tmux"
-        ];
-      };
-      sessionVariables = {
-        EDITOR = "vim";
-        GOPATH = "$HOME/.go";
-      };
-    };
-
-
-     starship = {
+  programs.emacs = {
       enable = true;
-      enableZshIntegration = true;
-      enableFishIntegration = false;
+     # package = (pkgs.emacsGit.override {
+     # withXwidgets = true;
+   # });
+     package = pkgs.emacs-nox;
+     extraPackages = epkgs: [ epkgs.vterm epkgs.xwidgets-reuse ];
+ };
+  
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
       settings = {
-        character = {
-          success_symbol = "[»](bold green) ";
-          error_symbol = "[✗](bold red) ";
-        };
-        directory = {
-          fish_style_pwd_dir_length = 1;
-          truncation_length = 1;
-        };
-        hostname = {
-          ssh_only = false;
-          format = "[$hostname]($style):";
-        };
-        gcloud = { disabled = true; };
-        kubernetes = { disabled = false; };
-        username = { format = "[$user]($style)@"; };
-      };
+         format = "$shlvl$shell$username$hostname$nix_shell$git_branch$git_commit$git_state$git_status$directory$jobs$cmd_duration$character";
+           username = {
+             style_user = "bright-white bold";
+             style_root = "bright-red bold";
+          };
+
+         character = {
+         success_symbol = "[➜](bold green)";
+         error_symbol = "[➜](bold red)";
     };
-
-      emacs = {
-      enable = true;
-      package = pkgs.emacs-nox;
-      extraPackages = epkgs: [ epkgs.vterm ];
-    };
- 
-
-      dircolors = {
-        enable = true;
-        enableFishIntegration = true;
-      };
-
-
-      git = {
+  };
+};
+  
+        programs.git = {
         enable    = true;
         userName  = "Kaleb Alves";
         userEmail = "kaleblucasalves@hotmail.com";
@@ -255,23 +200,13 @@ in
           key           = "";
           signByDefault = false;
         };
+     };
 
+  programs.fzf.enable = true;
+  programs.fzf.enableZshIntegration = true;
 
-        extraConfig = {
-          core.editor        = "vim";
-          github.user        = "forgondolin";
-          init.defaultBranch = "main";
-          pull.rebase        = true;
-        };
-      };
-    };
-
-    services = {
-      emacs = {
-         enable = true;   
-        };
-    
-  };
-
-    
- }
+  home.file.".config/oh-my-zsh/themes/af-no-magic.zsh-theme".source = ./modules/shell/af-no-magic.zsh-theme;
+services.emacs={ 
+  enable = true;   
+ };
+}

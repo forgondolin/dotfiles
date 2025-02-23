@@ -1,0 +1,46 @@
+ZSH_CUSTOM=$HOME/.config/oh-my-zsh
+
+CASE_SENSITIVE="true"
+
+DISABLE_AUTO_TITLE="false"
+
+COMPLETION_WAITING_DOTS="true"
+
+# User configuration
+alias ls="ls -lF"
+alias la="ls -a"
+alias gs="git status"
+alias gb="git branch"
+
+#export EDITOR="emacsclient -nw"
+#export VISUAL=$EDITOR
+
+export TERM="xterm-256color"
+
+setopt interactivecomments
+
+export PATH="$PATH:/usr/local/bin:/bin:/usr/sbin:/sbin:/usr/bin:$HOME/.local/bin:$HOME/.cargo/bin"
+
+# vterm_printf(){
+#    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ] ); then
+        # Tell tmux to pass the escape sequences through
+ #       printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+  #  elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+   #     printf "\eP\e]%s\007\e\\" "$1"
+  #  else
+   #     printf "\e]%s\e\\" "$1"
+  #  fi
+# }
+
+# For stuff not suppose to be version controlled
+if [ -e ~/.env_custom ]; then
+  source ~/.env_custom
+fi
+
+PROMPT="$fg[cyan]%}$USER@%{$fg[blue]%}%m ${PROMPT}"
+
+
+export LANG="pt_BR.UTF-8"
+export LC_ALL="pt_BR.UTF-8"
+export LANGUAGE="pt_BR:en_US"
